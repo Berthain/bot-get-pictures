@@ -2,19 +2,19 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import threading
-from downloader import ImageDownloader
 
 class ImageDownloaderApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Downloader de Imagens - Berthain")
-        self.root.geometry("600x400")
+        self.root.geometry("600x450")  # Aumentei um pouco para caber a checkbox
         self.root.resizable(False, False)
 
         self.url_var = tk.StringVar()
         self.dir_var = tk.StringVar()
         self.status_var = tk.StringVar(value="Aguardando...")
         self.progress_var = tk.IntVar(value=0)
+        self.use_selenium = tk.BooleanVar(value=False)  # Variável para a checkbox
 
         self.create_widgets()
 
@@ -32,6 +32,27 @@ class ImageDownloaderApp:
         
         self.btn_browse = tk.Button(frame_dir, text="Procurar...", command=self.browse_directory)
         self.btn_browse.pack(side="right", padx=(5, 0))
+
+        # Checkbox para escolher o modo de download
+        frame_mode = tk.Frame(self.root)
+        frame_mode.pack(pady=(15, 5), padx=20, anchor="w")
+        
+        self.chk_selenium = tk.Checkbutton(
+            frame_mode, 
+            text="Usar modo completo (Selenium) - Para sites protegidos ou com lazy-loading", 
+            variable=self.use_selenium,
+            font=("Arial", 9)
+        )
+        self.chk_selenium.pack(anchor="w")
+        
+        # Texto explicativo
+        tk.Label(
+            frame_mode, 
+            text="✓ Modo Rápido: Sites simples (mais rápido)\n✓ Modo Completo: Sites como The Sun, AS.com (mais lento mas mais eficaz)", 
+            font=("Arial", 8),
+            fg="gray",
+            justify="left"
+        ).pack(anchor="w", pady=(5, 0))
 
         self.progress_bar = ttk.Progressbar(self.root, orient="horizontal", length=560, mode="determinate", variable=self.progress_var)
         self.progress_bar.pack(pady=20)
@@ -62,14 +83,33 @@ class ImageDownloaderApp:
         self.btn_browse.config(state="disabled")
         self.progress_var.set(0)
 
-        # Cria a instância do downloader com as funções de callback
-        downloader = ImageDownloader(
-            url=url, 
-            save_dir=save_dir, 
-            on_status=self.update_status, 
-            on_progress=self.update_progress, 
-            on_complete=self.download_finished
-        )
+        # Verifica qual modo usar
+        if self.use_selenium.get():
+            # MODO COMPLETO (Selenium)
+            self.status_var.set("Iniciando modo completo (Selenium)...")
+            try:
+                from downloader_selenium import ImageDownloaderSelenium
+                downloader = ImageDownloaderSelenium(
+                    url=url, 
+                    save_dir=save_dir, 
+                    on_status=self.update_status, 
+                    on_progress=self.update_progress, 
+                    on_complete=self.download_finished
+                )
+            except ImportError:
+                messagebox.showerror("Erro", "Selenium não instalado!\n\nInstale com:\npip install selenium webdriver-manager")
+                self.reset_ui()
+                return
+        else:
+            # MODO RÁPIDO (Requests + BeautifulSoup)
+            from downloader import ImageDownloader
+            downloader = ImageDownloader(
+                url=url, 
+                save_dir=save_dir, 
+                on_status=self.update_status, 
+                on_progress=self.update_progress, 
+                on_complete=self.download_finished
+            )
 
         # Inicia em uma thread separada
         thread = threading.Thread(target=downloader.run)
@@ -103,4 +143,4 @@ class ImageDownloaderApp:
         self.btn_download.config(state="normal")
         self.btn_browse.config(state="normal")
         self.status_var.set("Aguardando...")
-        self.progress_var.set(0) # Zera a barra de progresso
+        self.progress_var.set(0)  # Zera a barra de progresso

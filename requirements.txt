@@ -1,0 +1,19 @@
+# ============================================
+# Image Downloader - Berthain
+# Dependências do projeto
+# ============================================
+
+# --- Dependências Básicas (Modo Rápido) ---
+# Necessárias para o funcionamento básico do aplicativo
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+
+# --- Dependências do Modo Completo (Selenium) ---
+# Necessárias para o modo Selenium (sites protegidos/lazy-loading)
+selenium>=4.15.0
+webdriver-manager>=4.0.0
+
+# ============================================
+# Instalação:
+# pip install -r requirements.txt
+# ============================================
