@@ -598,14 +598,14 @@ class ImageDownloaderApp:
 
     def start_download(self):
         url = self.url_var.get().strip()
-        save_dir = self.dir_var.get().strip() or self.default_download_dir
+        save_dir = self.dir_var.get().strip()
 
         if not url:
-            messagebox.showwarning("Atenção", "Por favor, insira o link do site.")
+            messagebox.showwarning("Atenção", "Informe o endereço no campo 'Link do Site' antes de iniciar o download.")
             return
 
         if not save_dir:
-            messagebox.showwarning("Atenção", "Nenhuma pasta foi definida. Configure a pasta padrão em Ferramentas > Configurar ou escolha uma pasta manualmente.")
+            messagebox.showwarning("Atenção", "Informe a pasta de destino em 'Salvar em' antes de iniciar o download.")
             return
 
         self.dir_var.set(save_dir)
